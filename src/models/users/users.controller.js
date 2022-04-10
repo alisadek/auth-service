@@ -1,4 +1,5 @@
 const { signup, userExists, signin } = require("./users.model");
+const jwt = require("jsonwebtoken");
 
 async function httpSignup(req, res) {
 	const user = req.body;
@@ -25,9 +26,19 @@ async function httpSignin(req, res) {
 			.json({ error: "Missing required user property" });
 	}
 	const signedInUser = await signin(user);
+
+	const accessToken = generateAccessToken(signedInUser);
+	const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
 	if (signedInUser) {
-		return res.status(200).json(signedInUser);
+		return res.status(200).json({ accessToken, refreshToken });
 	}
 	return res.status(500).json({ error: "failed to login" });
 }
+
+function generateAccessToken(user) {
+	return jwt.sign({ uid: user.id }, process.env.ACCESS_TOKEN_SECRET, {
+		expiresIn: "15s",
+	});
+}
+
 module.exports = { httpSignup, httpSignin };

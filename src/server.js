@@ -3,6 +3,7 @@ require("dotenv").config();
 const http = require("http");
 
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
 
 const app = require("./app");
 
