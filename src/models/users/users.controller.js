@@ -32,6 +32,7 @@ async function httpSignup(req, res, next) {
 		const newUser = await signup(user);
 		const accessToken = generateAccessToken(newUser);
 		const refreshToken = generateRefreshToken(newUser);
+		saveRefreshTokenToUser(newUser, refreshToken);
 		return res.status(201).json({ accessToken, refreshToken });
 	} catch (error) {
 		next(error);
@@ -52,7 +53,6 @@ async function httpSignin(req, res) {
 	const refreshToken = generateRefreshToken(signedInUser);
 
 	saveRefreshTokenToUser(signedInUser, refreshToken);
-	console.log("Token: ", signedInUser);
 
 	return res
 		.status(200)

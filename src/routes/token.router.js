@@ -1,7 +1,5 @@
 const express = require("express");
-const {
-	handleRefreshToken,
-} = require("../models/controllers/refresh-token.controller");
+const { handleRefreshToken } = require("../models/users/token.controller");
 
 const tokenRouter = express.Router();
 

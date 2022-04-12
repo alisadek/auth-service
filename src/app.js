@@ -5,10 +5,12 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 
-const { isAuth, authenticateToken } = require("./middleware/auth.middleware");
+const { authenticateToken } = require("./middleware/auth-jwt.middleware.js.js");
 const usersRouter = require("./routes/users.router");
 const postsRouter = require("./routes/posts.router");
-const tokenRouter = require("./routes/refresh-token.router");
+const logoutRouter = require("./routes/logout.router");
+const tokenRouter = require("./routes/token.router");
+const rolesRouter = require("./routes/roles.router");
 
 const app = express();
 
@@ -20,7 +22,9 @@ app.use(cookieParser());
 app.use(helmet());
 
 app.use("/api/user", usersRouter);
+app.use("/api/roles", rolesRouter);
 app.use("/api/token", tokenRouter);
+app.use("/api/logout", logoutRouter);
 
 app.use("/api/posts", authenticateToken, postsRouter);
 app.use((error, req, res, next) => {
