@@ -1,21 +1,41 @@
-const { signup, userExists, signin } = require("./users.model");
+const {
+	signup,
+	userExists,
+	signin,
+	saveRefreshTokenToUser,
+} = require("./users.model");
 const jwt = require("jsonwebtoken");
+const {
+	generateAccessToken,
+	generateRefreshToken,
+} = require("../../helpers/jwt.helper");
 
-async function httpSignup(req, res) {
+async function httpSignup(req, res, next) {
 	const user = req.body;
-	if (!user.name || !user.email || !user.password) {
-		return res
-			.status(400)
-			.json({ error: "Missing required user property" });
+
+	//Input Validation
+	try {
+		if (!user.name || !user.email || !user.password) {
+			return res
+				.status(400)
+				.json({ error: "Missing required user property" });
+		}
+		//Existing user check
+		const existingUser = await userExists(user);
+
+		if (existingUser) {
+			return res
+				.status(409)
+				.json({ error: "User already exists! Try signing in." });
+		}
+
+		const newUser = await signup(user);
+		const accessToken = generateAccessToken(newUser);
+		const refreshToken = generateRefreshToken(newUser);
+		return res.status(201).json({ accessToken, refreshToken });
+	} catch (error) {
+		next(error);
 	}
-	const existingUser = await userExists(user);
-	if (existingUser) {
-		return res
-			.status(400)
-			.json({ error: "User already exists! Try signing in." });
-	}
-	await signup(user);
-	return res.status(201).json(user);
 }
 
 async function httpSignin(req, res) {
@@ -28,17 +48,23 @@ async function httpSignin(req, res) {
 	const signedInUser = await signin(user);
 
 	const accessToken = generateAccessToken(signedInUser);
-	const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
-	if (signedInUser) {
-		return res.status(200).json({ accessToken, refreshToken });
-	}
-	return res.status(500).json({ error: "failed to login" });
+
+	const refreshToken = generateRefreshToken(signedInUser);
+
+	saveRefreshTokenToUser(signedInUser, refreshToken);
+	console.log("Token: ", signedInUser);
+
+	return res
+		.status(200)
+		.cookie("jwt", refreshToken, {
+			httpOnly: true,
+			maxAge: 25 * 60 * 60 * 1000,
+		})
+		.json({ accessToken });
 }
 
-function generateAccessToken(user) {
-	return jwt.sign({ uid: user.id }, process.env.ACCESS_TOKEN_SECRET, {
-		expiresIn: "15s",
-	});
+function httpSignout(req, res) {
+	jwt.signout(req, res, false);
 }
 
-module.exports = { httpSignup, httpSignin };
+module.exports = { httpSignup, httpSignin, httpSignout };

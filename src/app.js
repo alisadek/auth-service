@@ -3,10 +3,12 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const helmet = require("helmet");
+const cookieParser = require("cookie-parser");
 
 const { isAuth, authenticateToken } = require("./middleware/auth.middleware");
 const usersRouter = require("./routes/users.router");
 const postsRouter = require("./routes/posts.router");
+const tokenRouter = require("./routes/refresh-token.router");
 
 const app = express();
 
@@ -14,8 +16,11 @@ app.use(cors({ origin: "http://localhost:3000" }));
 app.use(morgan("combined"));
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(helmet());
+
 app.use("/api/user", usersRouter);
+app.use("/api/token", tokenRouter);
 
 app.use("/api/posts", authenticateToken, postsRouter);
 app.use((error, req, res, next) => {

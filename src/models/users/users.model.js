@@ -1,6 +1,7 @@
 const users = require("./users.mongo");
 const HttpError = require("../error/http-error.model");
 const bcrypt = require("bcrypt");
+const res = require("express/lib/response");
 
 async function userExists({ email }) {
 	try {
@@ -11,21 +12,17 @@ async function userExists({ email }) {
 }
 
 async function signup({ name, email, password }) {
-	let hashedPassword;
-	try {
-		hashedPassword = await bcrypt.hash(password, 10);
-	} catch {
-		throw new Error("Failed to signup");
-	}
-	const createdUser = users.create({
-		name,
-		email,
-		image: "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80",
-		password: hashedPassword,
-	});
+	const hashedPassword = await bcrypt.hash(password, 10);
 
 	try {
-		await createdUser.save();
+		const createdUser = await users.create({
+			name,
+			email: email.toLowerCase(),
+			image: "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80",
+			password: hashedPassword,
+		});
+
+		return await createdUser.save();
 	} catch (err) {
 		throw new Error("Signing Up failed, please try again.");
 	}
@@ -44,4 +41,17 @@ async function signin({ email, password }) {
 		throw new Error("Error logging in!");
 	}
 }
-module.exports = { signup, userExists, signin };
+
+async function saveRefreshTokenToUser(foundUser, refreshToken) {
+	try {
+		const currentUser = await users.update(
+			{ email: foundUser.email },
+			{ token: refreshToken },
+		);
+		console.log("Updated user: ", foundUser);
+	} catch (err) {
+		throw new Error("failed to update token");
+	}
+}
+
+module.exports = { signup, userExists, signin, saveRefreshTokenToUser };
