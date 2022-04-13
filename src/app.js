@@ -6,7 +6,7 @@ const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 
 const { authenticateToken } = require("./middleware/auth-jwt.middleware.js.js");
-const usersRouter = require("./routes/users.router");
+const authRouter = require("./routes/auth.router");
 const postsRouter = require("./routes/posts.router");
 const logoutRouter = require("./routes/logout.router");
 const tokenRouter = require("./routes/token.router");
@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
 
-app.use("/api/user", usersRouter);
+app.use("/api/auth", authRouter);
 app.use("/api/roles", rolesRouter);
 app.use("/api/token", tokenRouter);
 app.use("/api/logout", logoutRouter);

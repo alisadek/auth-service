@@ -33,7 +33,13 @@ async function httpSignup(req, res, next) {
 		const accessToken = generateAccessToken(newUser);
 		const refreshToken = generateRefreshToken(newUser);
 		saveRefreshTokenToUser(newUser, refreshToken);
-		return res.status(201).json({ accessToken, refreshToken });
+		return res
+			.status(200)
+			.cookie("jwt", refreshToken, {
+				httpOnly: true,
+				maxAge: 25 * 60 * 60 * 1000,
+			})
+			.json({ accessToken });
 	} catch (error) {
 		next(error);
 	}
