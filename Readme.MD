@@ -22,6 +22,8 @@
             -   [API Reference](#api-reference)
     -   [Author Info](#author-info)
 
+## Full Documentation
+- You can find full documentation for this app [here](https://alisadek.notion.site/Documentation-5534b5c116b24901996b565d79e66465) 
 ## Description
 
 #### Available Features
