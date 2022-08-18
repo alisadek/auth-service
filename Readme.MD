@@ -45,13 +45,6 @@
 
 > I really enjoyed myself when I was creating this project. It did reinforce a lot fo the concepts I had and made me think about deeply about several security issues and attempt to solve them.
 
-### Leftouts
-
-I did my best to include everything you asked for. But due to the time constraint I did not have enough time to write tests.
-
-### Something I have learned
-
-This part right here. Writing a good Read.me file as well as documentation.
 
 ## Getting Started
 
